@@ -1,11 +1,8 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\network_script.js">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\level_administration.js">
     <Files>
-      <File FileName="Assets\Scripts\level_administration.js" Line="57" Column="6" />
-      <File FileName="Assets\Scripts\network_script.js" Line="1" Column="15" />
-      <File FileName="Assets\Scripts\client_script.js" Line="44" Column="1" />
-      <File FileName="Assets\Scripts\server_script.js" Line="40" Column="86" />
+      <File FileName="Assets\Scripts\level_administration.js" Line="23" Column="33" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

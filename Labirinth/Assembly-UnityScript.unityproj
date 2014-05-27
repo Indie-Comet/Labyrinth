@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\GUI_classes.js" />
+     <Compile Include="Assets\Scripts\Labyrinth.js" />
      <Compile Include="Assets\Scripts\client_script.js" />
      <Compile Include="Assets\Scripts\level_administration.js" />
      <Compile Include="Assets\Scripts\network_script.js" />
