@@ -9,8 +9,6 @@ var map_number : int;
 var maps : String[];
 var gui_skin : GUISkin;
 
-var field : Labyrinth;
-
 function OnGUI(){
 	var main_window : GUI_location = GetComponent(level_administration).main_window;
 	GUI.Box(main_window.position, main_window.content, gui_skin.window);
