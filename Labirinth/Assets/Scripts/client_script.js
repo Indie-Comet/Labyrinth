@@ -43,7 +43,7 @@ function ready (map : String){
     GetComponent(network_script).enabled = true;
     Application.LoadLevel(map);
     GetComponent(level_administration).mode = menu_mode.game;
-    GetComponent(level_administration).Turn_Mouse_Look(true);
+//    GetComponent(level_administration).Turn_Mouse_Look(true);
     GetComponent(server_script).enabled = false;
     GetComponent(client_script).enabled = false;
 }

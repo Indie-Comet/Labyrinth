@@ -85,4 +85,7 @@ class GameLog extends Labyrinth{
 			}
 		}
 	}
+	function addMove(direction : String) {
+		turn.Add(direction);
+	}
 }

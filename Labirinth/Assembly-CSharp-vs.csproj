@@ -46,10 +46,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\Client.cs" />
-     <Compile Include="Assets\Scripts\GUIEngine.cs" />
-     <Compile Include="Assets\Scripts\Network.cs" />
-     <Compile Include="Assets\Scripts\Server.cs" />
+     <Compile Include="Assets\PlayerGameLog.cs" />
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
