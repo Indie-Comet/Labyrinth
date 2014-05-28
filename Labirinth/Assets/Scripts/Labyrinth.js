@@ -31,6 +31,14 @@ class Treasure extends LabyrinthObject {
 	}
 };
 
+class Trap extends LabyrinthObject {
+	public var content : String;
+	function Trap(Content : String) {
+		content = Content;
+		type = "trap";
+	}
+};
+
 class Labyrinth {
 	public var cell : ArrayList[,];
 	public var horizontWalls : String[,];
@@ -43,6 +51,38 @@ class Labyrinth {
 			for (var j : int = 0; j < w; j++) {
 				cell[i, j] = new ArrayList();
 			}
-		}	
+		}
+		for (i = 0; i < h; i++) {	
+			for (j = 0; j < w + 1; j++) {
+				verticalWalls[i, j] = "empty";
+			}
+		}
+		for (i = 0; i < h + 1; i++) {
+			for (j = 0; j < w; j++) { 
+				horizontWalls[i, j] = "empty";
+			}
+		}
+	}
+}
+
+class GameLog extends Labyrinth{
+	var turn : ArrayList;
+	var iStart : int;
+	var jStart : int;
+	function GameLog(w : int, h : int, border : boolean, i : int, j : int) {
+		super(w, h);
+		turn = new ArrayList();
+		iStart = i;
+		jStart = j;
+		if (border) {
+			for (var r : int = 0; r < h; r++) {
+				verticalWalls[r, 0] = "border";
+				verticalWalls[r, w] = "border";
+			}
+			for (var c : int = 0; c < w; c++) {
+				verticalWalls[0, c] = "border";
+				verticalWalls[h, c] = "border";
+			}
+		}
 	}
 }
