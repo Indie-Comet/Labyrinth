@@ -47,6 +47,7 @@
 -i:UnityEditor
 Assets/Scripts/GUI_classes.js
 Assets/Scripts/Labyrinth.js
+Assets/Scripts/NetworkAdmin.js
 Assets/Scripts/PlayerGameLog.js
 Assets/Scripts/Server.js
 Assets/Scripts/client_script.js

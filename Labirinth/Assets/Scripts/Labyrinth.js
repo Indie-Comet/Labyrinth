@@ -40,10 +40,14 @@ class Trap extends LabyrinthObject {
 };
 
 class Labyrinth {
+	public var w : int;
+	public var h : int;
 	public var cell : ArrayList[,];
 	public var horizontWalls : String[,];
 	public var verticalWalls : String[,];
-	function Labyrinth(w : int, h : int) {
+	function Labyrinth(W : int, H : int) {
+		w = W;
+		h = H;
 		cell = new ArrayList[h, w];
 		horizontWalls = new String[h + 1, w];
 		verticalWalls = new String[h, w + 1];
