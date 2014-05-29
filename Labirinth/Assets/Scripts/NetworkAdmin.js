@@ -1,14 +1,14 @@
 ﻿#pragma strict
 
-var playerName : String = "NooB"; 
+private var playerName : String = "NooB"; 
 var serverPrefab : GameObject;
 var playerPrefab : GameObject;
 var myLog : GameLog;
 
-var w : int;
-var h : int;
+private var w : int;
+private var h : int;
 var map : String;
-var ready : boolean;
+private var ready : boolean;
 
 function Start () {
 	DontDestroyOnLoad(gameObject);
@@ -24,8 +24,10 @@ function createPlayer(name : String, w : int, h : int, i : int, j : int) {
 }
 
 function launchServer(w : int, h : int, map : String, nameP : String, i : int, j : int) {
+	Network.InitializeServer(32, 25000, false);
 	var server : GameObject = Instantiate(serverPrefab);
 	server.GetComponent(Server).initField(w, h);
+	server.name = "Server";
 	Application.LoadLevel(map);
 	createPlayer(nameP, w, h, i, j);
 }
@@ -54,4 +56,9 @@ function setH(a : int) {
 function setMap(a : String) {
 	map = a;
 	ready = true;
+}
+
+@RPC
+function addPlayer(i : int, j : int, nameP : String) {
+	GameObject.Find("Server").GetComponent(Server).addPlayer(i, j, name);
 }

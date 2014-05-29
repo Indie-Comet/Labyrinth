@@ -84,8 +84,8 @@ class GameLog extends Labyrinth{
 				verticalWalls[r, w] = "border";
 			}
 			for (var c : int = 0; c < w; c++) {
-				verticalWalls[0, c] = "border";
-				verticalWalls[h, c] = "border";
+				horizontWalls[0, c] = "border";
+				horizontWalls[h, c] = "border";
 			}
 		}
 	}

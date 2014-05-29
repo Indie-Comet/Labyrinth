@@ -8,3 +8,7 @@ function init (NameP : String, w : int, h : int, border : boolean, i : int, j : 
 	playerName = new String.Copy(NameP);
 }
 
+function Start () {
+	DontDestroyOnLoad(gameObject);
+}
+

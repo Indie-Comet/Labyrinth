@@ -1,14 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\NetworkAdmin.js">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GUIClasses.js">
     <Files>
-      <File FileName="Assets\Scripts\level_administration.js" Line="54" Column="6" />
-      <File FileName="Assets\Scripts\server_script.js" Line="45" Column="2" />
+      <File FileName="Assets\Scripts\NetworkAdmin.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Labyrinth.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\PlayerGameLog.js" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Server.js" Line="7" Column="43" />
-      <File FileName="Assets\Scripts\NetworkAdmin.js" Line="14" Column="2" />
-      <File FileName="Assets\Scripts\client_script.js" Line="44" Column="32" />
+      <File FileName="Assets\Scripts\Server.js" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GUIClasses.js" Line="13" Column="16" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

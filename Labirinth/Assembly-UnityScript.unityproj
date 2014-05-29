@@ -46,15 +46,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\GUI_classes.js" />
+     <Compile Include="Assets\Scripts\GUIClasses.js" />
      <Compile Include="Assets\Scripts\Labyrinth.js" />
+     <Compile Include="Assets\Scripts\MainMenu.js" />
      <Compile Include="Assets\Scripts\NetworkAdmin.js" />
      <Compile Include="Assets\Scripts\PlayerGameLog.js" />
      <Compile Include="Assets\Scripts\Server.js" />
-     <Compile Include="Assets\Scripts\client_script.js" />
-     <Compile Include="Assets\Scripts\level_administration.js" />
-     <Compile Include="Assets\Scripts\network_script.js" />
-     <Compile Include="Assets\Scripts\server_script.js" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
