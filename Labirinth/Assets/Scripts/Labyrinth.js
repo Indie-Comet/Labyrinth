@@ -67,17 +67,51 @@ class Labyrinth {
 			}
 		}
 	}
+	function movePlayer(name : String, i : int, j : int, direction : String) {
+		var player : Player;
+		var pos : int;
+		for (var it : int = 0; it < cell[i][j].Count; it++) {
+			if (cell[i, j][it].type == "player") {
+				player = cell[i, j];
+				if (player.name == name) {
+					pos = it;
+					break;
+				}
+			}
+		}
+		
+		cell[i, j].RemoveAt(pos);
+		if (direction == "up") {
+			cell[i - 1, j].Add(player);
+		}
+		if (direction == "down") {
+			cell[i + 1, j].Add(player);
+		}
+		if (direction == "left") {
+			cell[i, j - 1].Add(player);
+		}
+		if (direction == "right") {
+			cell[i, j + 1].Add(player);
+		}
+	}
+	function deletePlayer() {
+		
+	}
 }
 
 class GameLog extends Labyrinth{
 	var turn : ArrayList;
 	var iStart : int;
 	var jStart : int;
+	var iCur : int;
+	var jCur : int;
 	function GameLog(w : int, h : int, border : boolean, i : int, j : int) {
 		super(w, h);
 		turn = new ArrayList();
 		iStart = i;
 		jStart = j;
+		iCur = i;
+		jCur = j;
 		if (border) {
 			for (var r : int = 0; r < h; r++) {
 				verticalWalls[r, 0] = "border";
@@ -91,5 +125,38 @@ class GameLog extends Labyrinth{
 	}
 	function addMove(direction : String) {
 		turn.Add(direction);
+		if (direction == "right") {
+			jCur++;
+		}
+		if (direction == "left") {
+			jCur--;
+		}
+		if (direction == "down") {
+			iCur++;
+		}
+		if (direction == "up") {
+			iCur--;
+		}
+	}
+	function addWall(direction : String, wall : String) {
+		if (direction == "up" || direction == "down") {
+			var j : int = jCur;
+			var i : int;
+			if (direction == "up") {
+				i = iCur;
+			} else {
+				i = iCur + 1;
+			}
+			horizontWalls[i][j] = wall;
+		} else {
+			var i : int = iCur;
+			var j : int;
+			if (direction == "left") {
+				j = jCur;
+			} else {
+				j = jCur + 1;
+			}
+			verticalWalls[i][j] = wall;
+		}
 	}
 }
