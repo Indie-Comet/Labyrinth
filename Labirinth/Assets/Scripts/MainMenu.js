@@ -11,6 +11,7 @@ var clientButton : GUIObject;
 var backButton : GUIObject;
 var nameField : GUIObject;
 var createButton : GUIObject;
+var connectButton : GUIObject;
 var ipField : GUIObject;
 var skin : GUISkin;
 var mode : menuMode;
@@ -23,6 +24,7 @@ private var w : int;
 private var h : int;
 var iStart : int = 0;
 var jStart : int = 0;
+private var ip : String = "localhost";
 
 function Start() {
 	w = minSize;
@@ -78,6 +80,13 @@ function OnGUI () {
 		
 		if (GUI.Button(createButton.scale.convertScales(), createButton.content, skin.button)) {
 			GameObject.Find("Administration").GetComponent(NetworkAdmin).launchServer(w, h, "Classic", playerName, iStart, jStart);
+		}
+	}
+	
+	if (mode == menuMode.client) {
+		ip = GUI.TextField(ipField.scale.convertScales(), ip, skin.textField);
+		if (GUI.Button(connectButton.scale.convertScales(), connectButton.content, skin.button)) {
+			GameObject.Find("Administration").GetComponent(NetworkAdmin).connectToServer(ip, iStart, jStart, playerName);
 		}
 	}
 }

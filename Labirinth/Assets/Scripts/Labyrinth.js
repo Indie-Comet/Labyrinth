@@ -67,12 +67,32 @@ class Labyrinth {
 			}
 		}
 	}
+	
+	static function move(I : int, J : int, direction : String) : Vector2 {
+		var i : int = I;
+		var j : int = J;
+		if (direction == "up") {
+			i = i - 1;
+		}
+		if (direction == "down") {
+			i = i + 1;
+		}
+		if (direction == "left") {
+			j = j - 1;
+		}
+		if (direction == "right") {
+			j = j + 1;
+		}
+		return Vector2(i, j);
+	}
+
 	function movePlayer(name : String, i : int, j : int, direction : String) {
 		var player : Player;
 		var pos : int;
-		for (var it : int = 0; it < cell[i][j].Count; it++) {
-			if (cell[i, j][it].type == "player") {
-				player = cell[i, j];
+		for (var it : int = 0; it < cell[i, j].Count; it++) {
+			var ololo : LabyrinthObject = cell[i, j][it];
+			if (ololo.type == "player") {
+				player = cell[i, j][it];
 				if (player.name == name) {
 					pos = it;
 					break;
@@ -81,21 +101,14 @@ class Labyrinth {
 		}
 		
 		cell[i, j].RemoveAt(pos);
-		if (direction == "up") {
-			cell[i - 1, j].Add(player);
-		}
-		if (direction == "down") {
-			cell[i + 1, j].Add(player);
-		}
-		if (direction == "left") {
-			cell[i, j - 1].Add(player);
-		}
-		if (direction == "right") {
-			cell[i, j + 1].Add(player);
-		}
+		var tmp : Vector2 = Labyrinth.move(i, j, direction);
+		i = tmp.x;
+		j = tmp.y;
+		cell[i, j].Add(player);
 	}
+	
 	function deletePlayer() {
-		
+		//TODO:
 	}
 }
 
@@ -125,38 +138,29 @@ class GameLog extends Labyrinth{
 	}
 	function addMove(direction : String) {
 		turn.Add(direction);
-		if (direction == "right") {
-			jCur++;
-		}
-		if (direction == "left") {
-			jCur--;
-		}
-		if (direction == "down") {
-			iCur++;
-		}
-		if (direction == "up") {
-			iCur--;
-		}
+		var tmp : Vector2 = Labyrinth.move(iCur, jCur, direction);
+		iCur = tmp.x;
+		jCur = tmp.y;
 	}
 	function addWall(direction : String, wall : String) {
 		if (direction == "up" || direction == "down") {
 			var j : int = jCur;
-			var i : int;
+			var i : int = 0;
 			if (direction == "up") {
 				i = iCur;
 			} else {
 				i = iCur + 1;
 			}
-			horizontWalls[i][j] = wall;
+			horizontWalls[i, j] = "wall";
 		} else {
-			var i : int = iCur;
-			var j : int;
+			i = iCur;
+			j = 0;
 			if (direction == "left") {
 				j = jCur;
 			} else {
 				j = jCur + 1;
 			}
-			verticalWalls[i][j] = wall;
+			verticalWalls[i, j] = "wall";
 		}
 	}
 }

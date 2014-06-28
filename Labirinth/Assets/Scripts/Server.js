@@ -1,5 +1,7 @@
 ﻿#pragma strict
 
+//OnPlayerDisconnected
+
 var field : Labyrinth;
 var startAmmo : int = 3;
 
@@ -18,11 +20,4 @@ function OnPlayerDisconnected (player : NetworkPlayer) {
 
 function addPlayer(i : int, j : int, nameP : String) {
 	field.cell[i, j].Add(new Player(nameP, startAmmo));
-}
-
-@RPC
-function getData() {
-	networkView.RPC("setW", RPCMode.All, field.w);
-	networkView.RPC("setH", RPCMode.All, field.h);
-	networkView.RPC("setMap", RPCMode.All, "Classic");
 }

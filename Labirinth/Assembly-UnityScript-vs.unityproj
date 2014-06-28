@@ -50,8 +50,10 @@
      <Compile Include="Assets\Scripts\Labyrinth.js" />
      <Compile Include="Assets\Scripts\MainMenu.js" />
      <Compile Include="Assets\Scripts\NetworkAdmin.js" />
+     <Compile Include="Assets\Scripts\PlayerGUI.js" />
      <Compile Include="Assets\Scripts\PlayerGameLog.js" />
      <Compile Include="Assets\Scripts\Server.js" />
+     <Compile Include="Assets\Scripts\Visualisator.js" />
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
