@@ -1,6 +1,7 @@
 ﻿#pragma strict
 
 // TODO: Create Random Labyrinth;
+// Delete players
 
 class LabyrinthObject {
 	public var type : String;
@@ -23,6 +24,7 @@ class Player extends LabyrinthObject {
 	}
 };
 
+//Мягкое место
 class Treasure extends LabyrinthObject {
 	public var content : String;
 	function Treasure(Content : String) {
@@ -31,11 +33,21 @@ class Treasure extends LabyrinthObject {
 	}
 };
 
+//Ловушка (не считая мин в мягких местах, если такие будут)
 class Trap extends LabyrinthObject {
 	public var content : String;
 	function Trap(Content : String) {
 		content = Content;
 		type = "trap";
+	}
+};
+
+// Просто лежащий на полу итем
+class Item extends LabyrinthObject {
+	public var content : String;
+	function Item(Content : String) {
+		content = Content;
+		type = "item";
 	}
 };
 
@@ -68,6 +80,7 @@ class Labyrinth {
 		}
 	}
 	
+	//По кордам и направлению дает новые корды.
 	static function move(I : int, J : int, direction : String) : Vector2 {
 		var i : int = I;
 		var j : int = J;
@@ -84,6 +97,20 @@ class Labyrinth {
 			j = j + 1;
 		}
 		return Vector2(i, j);
+	}
+
+	function getWall(i : int, j : int, direction : String) {
+		if (direction == "up" || direction == "down") {
+			if (direction == "down") {
+				i++;
+			}
+			return horizontWalls[i, j];
+		} else {
+			if (direction == "right") {
+				j++;
+			}
+			return verticalWalls[i, j];
+		}
 	}
 
 	function movePlayer(name : String, i : int, j : int, direction : String) {
@@ -107,12 +134,36 @@ class Labyrinth {
 		cell[i, j].Add(player);
 	}
 	
+	function findPlayer(name : String) : Vector3 {
+		var player : Player;
+		for (var i : int = 0; i < h; i++) {
+			for (var j : int = 0; j < w; j++) {
+				for (var it : int = 0; it < cell[i, j].Count; it++) {
+					var tmp : LabyrinthObject = cell[i, j][it];
+					if (tmp.type == "player") {
+						player = tmp;
+						if (player.name == name) {
+							return Vector3(i, j, it);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	function deletePlayer() {
 		//TODO:
+	}
+	
+	function addItem(i : int, j : int, item : String) {
+		cell[i, j].Add(Item(item));
 	}
 }
 
 class GameLog extends Labyrinth{
+	public var items : ArrayList;
+	public var ammo : int;
+	
 	var turn : ArrayList;
 	var iStart : int;
 	var jStart : int;
@@ -136,12 +187,14 @@ class GameLog extends Labyrinth{
 			}
 		}
 	}
+	
 	function addMove(direction : String) {
 		turn.Add(direction);
 		var tmp : Vector2 = Labyrinth.move(iCur, jCur, direction);
 		iCur = tmp.x;
 		jCur = tmp.y;
 	}
+	
 	function addWall(direction : String, wall : String) {
 		if (direction == "up" || direction == "down") {
 			var j : int = jCur;
@@ -151,7 +204,7 @@ class GameLog extends Labyrinth{
 			} else {
 				i = iCur + 1;
 			}
-			horizontWalls[i, j] = "wall";
+			horizontWalls[i, j] = wall;
 		} else {
 			i = iCur;
 			j = 0;
@@ -160,7 +213,7 @@ class GameLog extends Labyrinth{
 			} else {
 				j = jCur + 1;
 			}
-			verticalWalls[i, j] = "wall";
+			verticalWalls[i, j] = wall;
 		}
 	}
 }

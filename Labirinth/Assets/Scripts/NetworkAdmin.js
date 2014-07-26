@@ -1,17 +1,39 @@
-﻿#pragma strict
+﻿/* Скрипт отвечает за любые сообщения между сервером и клентами 
+ * 
+ * Сообщение о ходе передаются в строке:
+ * <type> [<direction>] [<item>]
+ * 
+ * Сообщение о результате хода:
+ * if move 
+ * 		<result> [<cnt> {<courpse>}]
+ * if shoot
+ * 		<result> [<name>]
+ * if dig
+ * 		<result> <cnt> {<items>} // result - может ты откапал ловушку)
+ * 
+ * */
+ 
+ //~ TODO:
+ //~  Удаление Ливеров !!!
+ //~  Присвоение паторонов при создании игрока!
+ //~  Коменты в этом файле
+ 
+#pragma strict
 
-var playerName : String = "NooB"; 
+var playerName : String = "NooB";
+// Типо указатели на обьекты.
 var serverPrefab : GameObject;
 var playerPrefab : GameObject;
-var myLog : GameLog;
 
+var myLog : GameLog;
 private var W : int;
 private var H : int;
 private var iStart : int;
 private var jStart : int;
-var map : String;
 
-//private var ready : boolean;
+var map : String;
+var myTurn : boolean;
+
 private var wait : boolean = false;
 
 function Start () {
@@ -47,7 +69,7 @@ function connectToServer(ip : String, i : int, j : int, nameP : String) {
 function Update() {
 	if (wait) {
 		if (Network.peerType == NetworkPeerType.Client) {
-			networkView.RPC("getData", RPCMode.Server);
+			networkView.RPC("getData", RPCMode.Server, playerName);
 			wait = false;
 		}
 	}
@@ -70,30 +92,62 @@ function OnGUI() {
 	}
 }
 
+function sendTurn(turn : String) {
+	myTurn = false;
+	networkView.RPC("doTurn", RPCMode.Server, turn, playerName);
+}
+
+function sendResultOfTurn(nameP : String, turn : String, result : String, nameNext : String) {
+	networkView.RPC("visualiseTurn", RPCMode.All, nameP, turn, result);
+	networkView.RPC("setTurn", RPCMode.All, nameNext);
+}
+
+//****************************** THIS FUNCITONS FOR SERVER:
 @RPC
-function getData() {
+function doTurn(turn : String, nameP : String) {
+	GameObject.Find("Server").GetComponent(Server).doTurn(turn, nameP);
+}
+
+@RPC
+function getData(nameP : String) {
 	Debug.Log("HEAVY\\m/METALL");
+	var allObj : GameObject[] = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+	var correctName = true;
+	for (var i : int = 0; i < allObj.length; i++) {
+		if (nameP == allObj[i].name) correctName = false;
+	}
 	networkView.RPC("setAll", RPCMode.Others, GameObject.Find("Server").GetComponent(Server).field.w,
-					 GameObject.Find("Server").GetComponent(Server).field.h, "Classic");
+					 GameObject.Find("Server").GetComponent(Server).field.h, "Classic", correctName);
 }
 
 @RPC
-function setAll(w : int, h : int, MAP : String) {
-	W = w;
-	H = h;
-	map = MAP;
-	createPlayer(playerName, w, h, iStart, jStart);
-	Application.LoadLevel(map);
-}
-
-@RPC
-function addPlayer(i : int, j : int, name	P : String) {
+function addPlayer(i : int, j : int, nameP : String) {
 	GameObject.Find("Server").GetComponent(Server).addPlayer(i, j, name);
 	
 	var otherPlayers : GameObject[] = GameObject.FindGameObjectsWithTag("GameLog");
 	for (var k : int = 0; k < otherPlayers.length; k++) {
 		networkView.RPC("addGameLog", RPCMode.All, W, H, otherPlayers[k].name, nameP);	
 	}
+}
+
+//****************************** THIS FUNCITONS FOR CLIENTS:
+@RPC
+function visualiseTurn(nameP : String, turn : String, result : String) {
+	//TODO: + Print messages
+}
+
+@RPC
+function setAll(w : int, h : int, MAP : String, correctName : boolean) {
+	if (!correctName) {
+		Network.Disconnect();
+		//TODO : Message;
+		return;
+	}
+	W = w;
+	H = h;
+	map = MAP;
+	createPlayer(playerName, w, h, iStart, jStart);
+	Application.LoadLevel(map);
 }
 
 @RPC
@@ -104,4 +158,11 @@ function addGameLog(w : int, h : int, name : String, toName : String) {
 	var player : GameObject = Instantiate(playerPrefab, Vector3.zero, Quaternion(0, 0, 0, 0));
 	player.GetComponent(PlayerGameLog).init(name, w * 2, h * 2, false, w, h);
 	player.name = new String.Copy(name);	
+}
+
+@RPC
+function setTurn(toName : String) {
+	if (toName == playerName) {
+		myTurn = true;
+	}
 }

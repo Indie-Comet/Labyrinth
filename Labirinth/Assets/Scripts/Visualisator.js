@@ -1,6 +1,9 @@
-﻿#pragma strict
+﻿/* Рисует поле + Анимация(coming soon)
+ */
+#pragma strict
 
 var wall : GameObject;
+var heroObj : GameObject;
 private var xSize : float;
 private var ySize : float;
 private var zSize : float;
@@ -26,6 +29,15 @@ function addWall(i : int, j : int, type : String, num : int) {
 	}
 }
 
+function addObject(i : int, j : int, type : String, num : int) {
+	var newObj : GameObject;
+	if (type == "hero") {
+		newObj = Instantiate(heroObj);
+	}
+	newObj.transform.position = new Vector3(j * zSize, ySize / 2, i * zSize);
+}
+
+//Построение с нуля по GameLog
 function init(gameLog : GameLog) {
 	var oldWalls = GameObject.FindGameObjectsWithTag("Wall");
 	for (var obj in oldWalls) {
@@ -52,13 +64,11 @@ function init(gameLog : GameLog) {
 	scale /= 10;
 	GameObject.Find("Main Camera").transform.position = Vector3(gameLog.w * zSize / 2, 40 * scale, 9 * scale);
 	//END:
-	
+	addObject(gameLog.iCur, gameLog.jCur, "hero", 1);
 }
 
 function Start() {
 	xSize = wall.transform.localScale.x;
 	ySize = wall.transform.localScale.y;
 	zSize = wall.transform.localScale.z;
-	
-	//init(new GameLog(8, 6, true, 10, 10));
 }

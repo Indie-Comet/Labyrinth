@@ -1,4 +1,7 @@
-﻿#pragma strict
+﻿/* Скрипт отвечает за все что видит игрок игрока(типо кнопочки сходить влево или выстрелить) + Использует визуализатор.
+ */
+
+#pragma strict
 
 private var netAdmin : NetworkAdmin;
 private var selectedLog : GameLog;
@@ -6,6 +9,11 @@ private var visualisator : Visualisator;
 
 var selectButton : GUIObject;
 var skin : GUISkin;
+
+function printMessage(text : String) {
+	//TODO:
+	Debug.Log(text);
+}
 
 function Start () {
 	netAdmin = GameObject.Find("Administration").GetComponent(NetworkAdmin);

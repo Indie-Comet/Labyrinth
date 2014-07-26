@@ -1,4 +1,5 @@
-﻿#pragma strict
+﻿//Весит на обьекте отвечающем за храниние инфы о игрках
+#pragma strict
 
 var data : GameLog;
 var playerName : String;

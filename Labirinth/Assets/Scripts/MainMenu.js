@@ -31,7 +31,7 @@ function Start() {
 	h = minSize;
 }
 
-function OnGUI () {
+function OnGUI () {	
 	serverButton.normalizeFont();
 	clientButton.normalizeFont();
 	ipField.normalizeFont();
@@ -52,6 +52,8 @@ function OnGUI () {
 		if (GUI.Button(backButton.scale.convertScales(), backButton.content, skin.button)) {
 			mode = menuMode.main;
 		}
+		iStart = int.Parse(GUI.TextField(new Rect(50, 50, 100, 30), iStart.ToString()));
+		jStart = int.Parse(GUI.TextField(new Rect(50, 100, 100, 30), jStart.ToString()));
 	}
 	if (mode == menuMode.server) {
 		GUILayout.BeginArea(sizeArea.convertScales());
