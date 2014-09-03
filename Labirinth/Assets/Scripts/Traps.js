@@ -5,9 +5,8 @@ class Trap extends LabyrinthObject {
 	static public var TRAP_TYPE_EMPTY = 0;
 	static public var TRAP_TYPE_LAND_MINE = 1;
 	
-	public var name : String;
 	public var trapType : int;
-	public var cought = function(player : Player) {};
+	public var cought = function(player : Player, field : Labyrinth) {};
 	
 	function Trap() {
 		name = "empty";
@@ -16,7 +15,7 @@ class Trap extends LabyrinthObject {
 		toString = function() : String {
 			return "trap: " + name;
 		};
-		cought = function(player : Player) {};
+		cought = function(player : Player, field : Labyrinth) {};
 	}
 };
 
@@ -25,10 +24,12 @@ class Trap extends LabyrinthObject {
 class Landmine extends Trap {
 	function Landmine() {
 		super();
+		name = "landmine";
 		trapType = TRAP_TYPE_LAND_MINE;
-		cought = function(player : Player) {
+		cought = function(player : Player, field : Labyrinth) {
 			player.life--;
-			player.alive = player.life > 0;
-		}
+			player.alive = (player.life > 0);
+			type = TYPE_EMPTY;
+		};
 	}
 };

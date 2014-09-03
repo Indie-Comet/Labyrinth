@@ -23,7 +23,7 @@
 // TODO: Return info from item;
 // Delete players
 
-class LabyrinthObject {
+class LabyrinthObject extends Object {
 	static public var TYPE_EMPTY = 0;
 	static public var TYPE_ITEM = 1;
 	static public var TYPE_PLAYER = 2;
@@ -32,21 +32,22 @@ class LabyrinthObject {
 	
 	public var i : int;
 	public var j : int;
+	public var k : int;
+	public var name : String;
 	
 	public var type : int;
 	public var toString = function() : String{};
 	
 	function LabyrinthObject () {
-		type = 0;
+		type = TYPE_EMPTY;
 		toString = function() : String {
-			return type;
+			return type.ToString();
 		};
 	}
 };
 
 class Player extends LabyrinthObject {
 	public var items : ArrayList;
-	public var name : String;
 	public var life : int;
 	public var alive : boolean;
 
@@ -61,6 +62,10 @@ class Player extends LabyrinthObject {
 		
 		return ans;
 	}
+
+	function itemCount(a : Item) : int {
+		return itemCount(a.itemType);
+	}
 	
 	function deleteItem(itemType : int) {
 		var ans : int = 0;
@@ -71,6 +76,10 @@ class Player extends LabyrinthObject {
 				return;
 			}
 		}
+	}
+	
+	function deleteItem(a : Item) {
+		deleteItem(a.itemType);
 	}
 		
 	function Player(Name : String, Ammo : int, playerLife : int) {
@@ -85,8 +94,8 @@ class Player extends LabyrinthObject {
 		toString = function () : String {
 			var tmp : String = "player: name = " + name + "; life = " + 
 				life.ToString() + "; alive = " + alive.ToString()+ "; items : ";
-			for (var item : String in items) {
-				tmp += item + ' ';
+			for (var item : Item in items) {
+				tmp += item.toString() + ' ';
 			}
 			return tmp + ";";
 		};
@@ -97,6 +106,10 @@ class Player extends LabyrinthObject {
 			items.Add(i);
 		}
 		corpse.items = new ArrayList();
+	}
+
+	function ammo() : int {
+		return itemCount(new Bullet());
 	}
 };
 
@@ -233,7 +246,7 @@ class Labyrinth {
 			for (var j : int = 0; j < w; j++) {
 				var it = 0;
 				for (var tmp : LabyrinthObject in cell[i, j]) {
-					if (tmp.type == "player") {
+					if (tmp.type == LabyrinthObject.TYPE_PLAYER) {
 						player = tmp;
 						if (player.name == name) {
 							return Vector3(i, j, it);
@@ -256,6 +269,9 @@ class Labyrinth {
 		var i : int = tmp.x;
 		var j : int = tmp.y;
 		cell[i, j].Add(player);
+		player.i = i;
+		player.j = j;
+		player.k = cell[i, j].Count - 1;
 	}
 	
 	function killPlayer(name : String) {
@@ -265,12 +281,11 @@ class Labyrinth {
 		player.alive = false;
 	}
 	
-	function addObject(i : int, j : int, item : Object) {
+	function addObject(i : int, j : int, item : LabyrinthObject) {
+		item.i = i;
+		item.j = j;
+		item.k = cell[i, j].Count;
 		cell[i, j].Add(item);
-	}
-
-	function use(trap : Trap, player : Player) {
-		//TODO: Придумать ловушки
 	}
 
 	function makeBorder() {
@@ -327,7 +342,7 @@ class Labyrinth {
 		for (i = 0; i <= data.treasureCount; i++) {
 			var treasure : Treasure;
 			if (i == 0)
-				treasure = new Treasure("key");
+				treasure = new Treasure(new Key());
 			else 
 				if (data.useRandomTreasure) {
 					treasure = data.treasures[Mathf.FloorToInt(Random.Range(0, data.treasures.Count - float.Epsilon))];
@@ -349,7 +364,7 @@ class Labyrinth {
 				//check if other treasures here:
 				if (!data.canPutTreasureTogether) {
 					for (var obj : LabyrinthObject in cell[treasurePos.x, treasurePos.y]) {
-						if (obj.type == "treasure") {
+						if (obj.type == LabyrinthObject.TYPE_TREASURE) {
 							f = false;
 						}
 					}
@@ -380,12 +395,7 @@ class GameLog extends Labyrinth {
 	var iStart : int;
 	var jStart : int;
 	var iCur : int;
-	var jCur : int;
-	function use(trap : Trap) {
-		//TODO: ИФЫ
-		use(trap, player);
-	}
-	
+	var jCur : int;	
 	function addObject(a : Object) {
 		cell[iCur, jCur].Add(a);
 	}

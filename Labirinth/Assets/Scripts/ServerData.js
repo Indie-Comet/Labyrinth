@@ -17,10 +17,6 @@ var content : Array;
 var choosed : Array;
 var ammoCount : Array;
 
-var treasureType : String[] = ["empty", "ammo", "item", "trap"];
-var traps : String[] = ["empty"];
-var items : String[] = ["key", "bullet", "item", "trap"];
-
 var map : String = "Classic";
 var skin : GUISkin; 
 
@@ -67,7 +63,7 @@ function booleanOption(value : boolean, name : String) : boolean {
 	return value;
 }
 
-function treasureList() {
+/*function treasureList() {
 	for (var i : int = 0; i < typeInt.Count; i++) {
 		GUILayout.BeginHorizontal();
 			var tmp : int = typeInt[i];
@@ -115,7 +111,7 @@ function treasureList() {
 		scrollType.Add(new Vector2(0, 0));
 		data.treasures.Add(new Treasure());
 	}
-}
+}*/
 
 function serverSettingsWindow() {
 	scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -127,9 +123,9 @@ function serverSettingsWindow() {
 		startLife = option(startLife, "Start life : ", 0, maxCnt);
 		data.wallProb = sliderOption(data.wallProb, "Prob of Wall : ", 0, 1);
 		
-		GUILayout.Box("TREASURES:", skin.box);
+		//GUILayout.Box("TREASURES:", skin.box);
 		
-		treasureList();
+		//treasureList();
 		
 		data.useRandomTreasure = booleanOption(data.useRandomTreasure, "Use random treasure");
 		data.treasureCount = option(data.treasureCount, "Treasure count : ", 0, maxCnt);

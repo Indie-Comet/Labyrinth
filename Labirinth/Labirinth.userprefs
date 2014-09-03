@@ -1,13 +1,14 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Traps.js">
     <Files>
+      <File FileName="Assets\Scripts\Traps.js" Line="32" Column="1" />
+      <File FileName="Assets\Scripts\Server.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Traps.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Labyrinth.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\ServerData.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\NetworkAdmin.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Containers.js" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Server.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\PlayerGameLog.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\PlayerGUI.js" Line="1" Column="1" />
       <File FileName="Assets\Scripts\MainMenu.js" Line="1" Column="1" />

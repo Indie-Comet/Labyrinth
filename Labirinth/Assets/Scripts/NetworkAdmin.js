@@ -1,17 +1,17 @@
-﻿/* Скрипт отвечает за любые сообщения между сервером и клентами 
+﻿/* Скрипт отвечает за любые сообщения между сервером и клентами
  * 
  * Сообщение о ходе передаются в строке:
  * <type> [<direction>] [<item>]
  * 
  * Сообщение о результате хода:
- * if move 
- * 		<result> [<cnt> {<corpse>} <cnt> <trapName> <isTreasure>] (только если совершен ход) 
- * 		<result> = "move" | "wall" // TODO : ESCAPE use DOOR 
+ * if move
+ * 		<result> [<cnt> {<corpse>} <cnt> <trapName> <isTreasure>] (только если совершен ход)
+ * 		<result> = "move" | "wall" // TODO : ESCAPE use DOOR
  * if shoot
- * 		<cnt> {<name>} <isSamePos> // isSamePos - если убийца тут же подбирает трупы. 
+ * 		<cnt> {<name>} <isSamePos> // isSamePos - если убийца тут же подбирает трупы.
  * if dig
- * 		<cnt> {<type> <name>}
- * 		<type> = "trap" | "item" | "ammo" // if type == ammo then name = ammo
+ * 		<cnt> {<isTrap> <name>}
+ * 		<isTrap> = "1" | "0" // if 1 == trap then 0 = item
  * */
  
  //TODO:
@@ -28,6 +28,7 @@ var maxResultSize : int = 400;
 var serverPrefab : GameObject;
 var playerPrefab : GameObject;
 private var serverData : ServerData;
+private var objectFactory : LabyrinthObjectFactory;
 
 var myLog : GameLog;
 private var W : int;
@@ -46,6 +47,7 @@ private var wait : boolean = false;
 function Start () {
 	DontDestroyOnLoad(gameObject);
 	serverData = GameObject.Find("Server Data").GetComponent(ServerData);
+	objectFactory = GameObject.Find("ObjectFactory").GetComponent(LabyrinthObjectFactory);
 }
 
 function createPlayer(name : String, w : int, h : int, i : int, j : int) {
@@ -115,6 +117,7 @@ function sendTurn(turn : String) {
 		doTurn(turn, playerName);
 }
 
+//****************************** THIS FUNCTIONS FOR SERVER:
 function sendWhoNext(nameNext : String) {
 	networkView.RPC("setTurn", RPCMode.All, nameNext);
 }
@@ -124,7 +127,6 @@ function sendResultOfTurn(nameP : String, turn : String, result : String, nameNe
 	networkView.RPC("setTurn", RPCMode.All, nameNext);
 }
 
-//****************************** THIS FUNCTIONS FOR SERVER:
 @RPC
 function doTurn(turn : String, nameP : String) {
 	GameObject.Find("Server").GetComponent(Server).doTurn(turn, nameP);
@@ -185,24 +187,18 @@ function doResultOfTurn(nameP : String, turnS : String, resultS : String) {
 			var trapCount : int = int.Parse(result[2 + corpseCount]);
 			for (it = 0; it < trapCount; it++) {
 				name = result[3 + corpseCount + it];
-				gameLog.use(new Trap(name));
+				var trap : Trap = objectFactory.createTrap(int.Parse(name));
+				trap.cought(gameLog.player, gameLog);
 			}
 			if (result[3 + corpseCount + trapCount] == "1") {
-				gameLog.addObject(new Treasure("unknown"));
+				gameLog.addObject(new Treasure(new Item()));
 			}
 		}
 	} else if (turn[0] == "shoot") {
 		var tmpPlayer : Player = gameLog.player;
-		if (turn[2] == "bullet") 
-			tmpPlayer.ammo--;
-		else {
-			for (it = 0; it < tmpPlayer.items.Count; it++) {
-				if (tmpPlayer.items[it] == turn[2]) {
-					tmpPlayer.items.RemoveAt(it);
-					break;
-				}
-			}
-		}
+		var bullet : Item = objectFactory.createItem(int.Parse(turn[2]));
+		tmpPlayer.deleteItem(bullet);
+		
 		var victimCount : int = int.Parse(result[0]);
 		var isSamePos : boolean = result[victimCount + 1] == "1";
 		for (it = 0; it < victimCount; it++) {
@@ -212,7 +208,7 @@ function doResultOfTurn(nameP : String, turnS : String, resultS : String) {
 			} else {
 				tmpPlayer = myLog.player;
 			}
-			tmpPlayer.hit(turn[2]);
+			bullet.hitPlayer(tmpPlayer, gameLog);
 			if (isSamePos)
 				gameLog.player.take(tmpPlayer);
 		}
@@ -221,14 +217,10 @@ function doResultOfTurn(nameP : String, turnS : String, resultS : String) {
 		for (it = 0; it < count; it++) {
 			var type : String = result[it * 2 + 1];
 			name = result[it * 2 + 2];
-			if (type == "item") {
-				gameLog.player.items.Add(name);
-			} else if (type == "trap") {
-				gameLog.use(new Trap(name));
-			} else if (type == "ammo") {
-				gameLog.player.ammo += int.Parse(name);
-			} else if (type == "empty") {
-				
+			if (type == "0") {
+				gameLog.player.items.Add(objectFactory.createItem(int.Parse(name)));
+			} else if (type == "1") {
+				objectFactory.createTrap(int.Parse(name)).cought(gameLog.player, gameLog);
 			}
 		}
 	}

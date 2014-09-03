@@ -13,11 +13,13 @@ private var turnPlayer : String;
 private var tmpQueue : MyQueue;
 private var netAdmin : NetworkAdmin;
 private var serverData : ServerData;
+private var objectFactory : LabyrinthObjectFactory;
 
 function Start () {
 	commandLog = new Array();
 	DontDestroyOnLoad(gameObject);
 	netAdmin = GameObject.Find("Administration").GetComponent(NetworkAdmin);
+	objectFactory = GameObject.Find("ObjectFactory").GetComponent(LabyrinthObjectFactory);
 }
 
 function initField() {
@@ -63,8 +65,9 @@ function OnPlayerDisconnected (player : NetworkPlayer) {
 }
 
 function addPlayer(i : int, j : int, nameP : String, player : NetworkPlayer) {
-	Debug.Log("addPlayer " + nameP);
-	field.cell[i, j].Add(new Player(nameP, startAmmo, startLife));
+	var tmp : Player = new Player(nameP, startAmmo, startLife);
+	Debug.Log("addPlayer " + nameP + ' ' + tmp.toString());
+	field.cell[i, j].Add(tmp);
 	turnQueue.push(nameP);
 	var ip : String = player.externalIP;
 	Debug.Log(ip + ' ' + nameP);
@@ -77,10 +80,11 @@ function move(nameP : String, direction : String) {
 	var result : String;
 	var nameNext : String;
 	var hasKey : boolean = false;
-	var playerPos : Vector3 = field.findPlayer(nameP);
+	var playerPos : Vector3 = field.findPlayer(nameP);	
 	var player : Player = field.cell[playerPos.x, playerPos.y][playerPos.z];
 	for (var it : int = 0; it < player.items.Count; it++) {
-		if (player.items[it] == "key") {
+		var itt : Item = player.items[it];
+		if (itt.itemType == Item.ITEM_TYPE_KEY) {
 			hasKey = true;
 		}
 	}
@@ -108,14 +112,14 @@ function move(nameP : String, direction : String) {
 		var obj : LabyrinthObject;
 		
 		for (obj in field.cell[playerPos.x, playerPos.y]) {
-			if (obj.type == "treasure") {
+			if (obj.type == LabyrinthObject.TYPE_TREASURE) {
 				treasure = true;
-			} else if (obj.type == "player") {
+			} else if (obj.type == LabyrinthObject.TYPE_PLAYER) {
 				corpse = obj;
 				if (corpse.alive == false) corpses.Add(corpse); 
-			} else if (obj.type == "trap") {
+			} else if (obj.type == LabyrinthObject.TYPE_TRAP) {
 				trap = obj;
-				if (trap.life != 0) traps.Add(trap);
+				traps.Add(trap);
 			}
 		}
 		
@@ -127,8 +131,8 @@ function move(nameP : String, direction : String) {
 		}
 		result += ' ' + traps.Count.ToString();
 		for (trap in traps) {
-			result += ' ' + trap.content;
-			field.use(trap, player);
+			result += ' ' + trap.trapType;
+			trap.cought(player, field);
 		}
 		if (treasure) {
 			result += ' 1';
@@ -144,7 +148,7 @@ function move(nameP : String, direction : String) {
 	netAdmin.sendResultOfTurn(nameP, "move " + direction, result, nameNext);
 }
 
-function shoot(nameP : String, direction : String, item : String) {
+function shoot(nameP : String, direction : String, item : int) {
 	var result : String = "";
 	var nameNext : String;
 	var playerPos : Vector3 = field.findPlayer(nameP);
@@ -153,40 +157,40 @@ function shoot(nameP : String, direction : String, item : String) {
 	var corpses : Array = new Array();
 	var victims : Array = new Array();
 	
-	if (item == "bullet") {
-		player.ammo--;
-		var pos : Vector2 = new Vector2(playerPos.x, playerPos.y);
-		for (; field.getWall(playerPos.x, playerPos.y, direction) == "empty";) {
-			for (var obj : LabyrinthObject in field.cell[pos.x, pos.y]) {
-				if (obj.type == "player") {
-					tmpPlayer = obj;
-					if (tmpPlayer.name != nameP) {
-						victims.Add(tmpPlayer);
-					}
+	var bullet : Item = objectFactory.createItem(item);
+	player.deleteItem(new Bullet());
+	var pos : Vector2 = new Vector2(playerPos.x, playerPos.y);
+	for (;;) {
+		for (var obj : LabyrinthObject in field.cell[pos.x, pos.y]) {
+			if (obj.type == LabyrinthObject.TYPE_PLAYER) {
+				tmpPlayer = obj;
+				if (tmpPlayer.name != nameP) {
+					victims.Add(tmpPlayer);
 				}
 			}
-			if (victims.Count) {
-				break;
-			}
-			pos = Labyrinth.move(pos.x, pos.y, direction);
 		}
-		
-		result += victims.Count;
-		for (tmpPlayer in victims) {
-			result += ' ' + tmpPlayer.name;
-			tmpPlayer.hit(item);
-			if (tmpPlayer.alive == false) {
-				killPlayer(tmpPlayer.name);
-			}
+		if (victims.Count) {
+			break;
 		}
-		
-		if (playerPos.x == pos.x && playerPos.y == pos.y) {
-			result += " 1";
-		} else {
-			result += " 0";
+		if (field.getWall(pos.x, pos.y, direction) != "empty") {
+			bullet.hitWall(field.getWall(pos.x, pos.y, direction), direction);
 		}
+		pos = Labyrinth.move(pos.x, pos.y, direction);
+	}
+	
+	result += victims.Count;
+	for (tmpPlayer in victims) {
+		result += ' ' + tmpPlayer.name;
+		bullet.hitPlayer(tmpPlayer, field);
+		if (tmpPlayer.alive == false) {
+			killPlayer(tmpPlayer.name);
+		}
+	}
+	
+	if (playerPos.x == pos.x && playerPos.y == pos.y) {
+		result += " 1";
 	} else {
-		
+		result += " 0";
 	}
 	
 	nameNext = turnQueue.pop() || nameP;
@@ -205,31 +209,27 @@ function dig(nameP : String) {
 	var findEmpty : boolean = false;
 	
 	for (var it : LabyrinthObject in field.cell[playerPos.x, playerPos.y]) {
-		if (it.type == "treasure") {
-			treasure = it;
-			if (treasure.treasureType != "empty" || !findEmpty) 
-				treasures.Add(treasure);
-			findEmpty |= treasure.treasureType == "empty";
+		if (it.type == LabyrinthObject.TYPE_TREASURE) {
+			treasures.Add(treasure);
 		}
 	}
 	
 	result = treasures.Count.ToString();
+	var item : Item;
+	var trap : Trap;
 	for (treasure in treasures) {
-		result += ' ' + treasure.treasureType;
-		if (treasure.treasureType == "item") {
-			result += ' ' + treasure.content;
-			player.items.Add(treasure.content);
-		} else if (treasure.treasureType == "ammo") {
-			result += ' ' + treasure.ammo.ToString();
-			player.ammo += treasure.ammo;
-		} else if (treasure.treasureType == "trap") {
-			result += ' ' + treasure.trap.content;
-			field.use(treasure.trap, player);
-		} else if (treasure.treasureType == "empty") {
-			result += " empty";
-		} 
-		treasure.treasureType = "empty";
-		treasure.toString = new Treasure().toString;
+		if (treasure.content.type == LabyrinthObject.TYPE_TRAP) {
+			result += ' 1';
+			trap = treasure.content;
+			trap.cought(player, field);
+			result += ' ' + trap.trapType;
+		} else {
+			result += ' 0';
+			item = treasure.content; 
+			player.items.Add(item);
+			result += ' ' + item.itemType;
+		}
+		treasure.remove(field);
 	}
 	
 	nameNext = turnQueue.pop() || nameP;
@@ -250,7 +250,7 @@ function doTurn(turn : String, nameP : String) {
 	if (type == "move") {
 		move(nameP, arr[1]);
 	} else if (type == "shoot") {
-		shoot(nameP, arr[1], arr[2]);
+		shoot(nameP, arr[1], int.Parse(arr[2]));
 	} else if (type == "dig") {
 		dig(nameP);
 	}
@@ -277,18 +277,13 @@ function doCommand(command : String) {
 	} else if (com[0] == "give") {
 		pos = field.findPlayer(com[1]);
 		player = field.cell[pos.x, pos.y][pos.z];
-		player.items.Add(com[2]);
+		player.items.Add(objectFactory.createItem(int.Parse(com[2])));
 		netAdmin.sendResultOfTurn(com[1], "dig", "1 item " + com[2], "Server");
 	} else if (com[0] == "stat") {
 		pos = field.findPlayer(com[1]);
 		player = field.cell[pos.x, pos.y][pos.z];
 		commandLog.Add(player.toString());
 		commandLog.Add("           position = " + pos.x.ToString() + ' ' + pos.y.ToString());
-	} else if (com[0] == "give_ammo") {
-		pos = field.findPlayer(com[1]);
-		player = field.cell[pos.x, pos.y][pos.z];
-		player.ammo += int.Parse(com[2]);
-		netAdmin.sendResultOfTurn(com[1], "dig", "1 ammo " + com[2], "Server");
 	} else if (com[0] == "set_turn") {
 		turnQueue.push(turnPlayer);
 		turnPlayer = com[1];
@@ -296,14 +291,14 @@ function doCommand(command : String) {
 	} else if (com[0] == "add") {
 		var tmpos : Vector2 = new Vector2(int.Parse(com[1]), int.Parse(com[2]));
 		if (com[3] == "trap") {
-			field.cell[tmpos.x, tmpos.y].Add(new Trap(com[4]));
+			var ololo = int.Parse(com[4]);
+			var tt : Trap = objectFactory.createTrap(ololo);
+			field.addObject(tmpos.x, tmpos.y, tt);
 		} else if (com[3] == "treasure"){
 			if (com[4] == "trap") {
-				field.cell[tmpos.x, tmpos.y].Add(new Treasure(new Trap(com[5])));
-			} else if (com[4] == "ammo") {
-				field.cell[tmpos.x, tmpos.y].Add(new Treasure(int.Parse(com[5])));
+				field.addObject(tmpos.x, tmpos.y, new Treasure(objectFactory.createTrap(int.Parse(com[5]))));
 			} else if (com[4] == "item") {
-				field.cell[tmpos.x, tmpos.y].Add(new Treasure(com[5]));
+				field.addObject(tmpos.x, tmpos.y, new Treasure(objectFactory.createItem(int.Parse(com[5]))));
 			}
 		}
 	} else if (com[0] == "get") {
@@ -325,7 +320,7 @@ function Update() {
 
 function OnGUI() {
 	if (isConsoleOpen) {
-		GUI.Window(0, new Rect(0, 0, Screen.width, Screen.height / 3), console, "Server Console", consoleStyle);
+		GUI.Window(1488, new Rect(0, 0, Screen.width, Screen.height / 3), console, "Server Console", consoleStyle);
 	}
 	if (Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.BackQuote) {
 		isConsoleOpen = !isConsoleOpen;

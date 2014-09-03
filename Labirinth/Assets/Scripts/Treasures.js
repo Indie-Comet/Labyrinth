@@ -3,18 +3,19 @@
 //Мягкое место
 class Treasure extends LabyrinthObject {
 	public var name : String;
-	public var content : ArrayList;
+	public var content : LabyrinthObject;
 	
-	function Treasure(Content : ArrayList) {
+	function Treasure(Content : LabyrinthObject) {
 		content = Content;
 		type = TYPE_TREASURE;
 		toString = function() : String {
 			var res : String = "Treasure. Conntents : ";	
-			for (var i = 0; i < content.Count; i++) {
-				var tmp : LabyrinthObject = content[i];
-				res += tmp.toString() + " ";
-			}
+			res += content.toString() + " ";
 			return res;
 		};
+	}
+	
+	function remove(field : Labyrinth) {
+		type = TYPE_EMPTY;
 	}
 };
