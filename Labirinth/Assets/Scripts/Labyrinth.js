@@ -24,51 +24,66 @@
 // Delete players
 
 class LabyrinthObject {
-	public var type : String;
+	static public var TYPE_EMPTY = 0;
+	static public var TYPE_ITEM = 1;
+	static public var TYPE_PLAYER = 2;
+	static public var TYPE_TRAP = 3;
+	static public var TYPE_TREASURE = 4;
+	
+	public var i : int;
+	public var j : int;
+	
+	public var type : int;
 	public var toString = function() : String{};
+	
 	function LabyrinthObject () {
-		type = "empty";
+		type = 0;
 		toString = function() : String {
 			return type;
 		};
 	}
 };
 
-// Просто лежащий на полу итем
-class Item extends LabyrinthObject {
-	public var content : String;
-	function Item(Content : String) {
-		content = Content;
-		type = "item";
-		toString = function() : String {
-			return "item: " + content;
-		};
-	}
-};
-
 class Player extends LabyrinthObject {
 	public var items : ArrayList;
-	public var ammo : int;
 	public var name : String;
 	public var life : int;
 	public var alive : boolean;
-	function hit(item : String) {
-		if (item == "bullet") {
-			alive = false;
-		} else {
-			
+
+	function itemCount(itemType : int) : int {
+		var ans : int = 0;
+		for (var i : int = 0; i < items.Count; i++) {
+			var tmp : Item = items[i];
+			if (tmp.itemType == itemType) {
+				ans++;
+			}
 		}
+		
+		return ans;
 	}
 	
+	function deleteItem(itemType : int) {
+		var ans : int = 0;
+		for (var i : int = 0; i < items.Count; i++) {
+			var tmp : Item = items[i];
+			if (tmp.itemType == itemType) {
+				items.RemoveAt(i);
+				return;
+			}
+		}
+	}
+		
 	function Player(Name : String, Ammo : int, playerLife : int) {
 		life = playerLife;
-		type = "player";
+		type = TYPE_PLAYER;
 		name = Name;
-		ammo = Ammo;
 		alive = true;
 		items = new ArrayList();
+		for (var i : int = 0; i < Ammo; i++) {
+			items.Add(new Bullet());
+		}
 		toString = function () : String {
-			var tmp : String = "player: name = " + name + "; ammo = " + ammo.ToString() + "; life = " + 
+			var tmp : String = "player: name = " + name + "; life = " + 
 				life.ToString() + "; alive = " + alive.ToString()+ "; items : ";
 			for (var item : String in items) {
 				tmp += item + ' ';
@@ -78,71 +93,10 @@ class Player extends LabyrinthObject {
 	}
 	
 	function take(corpse : Player) {
-		ammo += corpse.ammo;
-		corpse.ammo = 0;
 		for (var i : String in corpse.items) {
 			items.Add(i);
 		}
 		corpse.items = new ArrayList();
-	}
-};
-
-//Ловушка if trap.life == -1 trap is endless// if trap.life == 0 trap is empty
-class Trap extends LabyrinthObject {
-	public var content : String;
-	public var life : int;
-	function Trap(Content : String, trapLife : int) {
-		life = trapLife;
-		content = Content;
-		type = "trap";
-		toString = function() : String {
-			return "trap: " + content;
-		};
-	}
-	function Trap(Content : String) {
-		this(Content, -1);
-	}
-};
-
-//Мягкое место
-class Treasure extends LabyrinthObject {
-	public var content : String;
-	public var treasureType : String;
-	public var trap : Trap;
-	public var ammo : int;
-	function Treasure(Content : String) {
-		content = Content;
-		type = "treasure";
-		treasureType = "item";
-		toString = function() : String {
-			return "treasure item: " + content;
-		};
-	}
-	
-	function Treasure(trapName : Trap) {
-		treasureType = "trap";
-		type = "treasure";
-		trap = trapName;
-		toString = function() : String {
-			return "treasure trap: " + trap.toString();
-		};
-	}
-	
-	function Treasure(Ammo : int) {
-		treasureType = "ammo";
-		type = "treasure";
-		ammo = Ammo;
-		toString = function() : String {
-			return "treasure ammo: " + ammo.ToString();
-		};
-	}
-	
-	function Treasure() {
-		treasureType = "emty";
-		type = "treasure";
-		toString = function() : String {
-			return "treasure empty";
-		};
 	}
 };
 
@@ -198,6 +152,7 @@ class Labyrinth {
 	public var cell : ArrayList[,];
 	public var horizontWalls : String[,];
 	public var verticalWalls : String[,];
+	
 	function Labyrinth(W : int, H : int) {
 		w = W;
 		h = H;
