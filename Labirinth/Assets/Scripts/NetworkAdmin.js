@@ -5,31 +5,38 @@
  * 
  * Сообщение о результате хода:
  * if move 
- * 		<result> [<cnt> {<courpse>}]
+ * 		<result> [<cnt> {<corpse>} <cnt> <trapName> <isTreasure>] (только если совершен ход) 
+ * 		<result> = "move" | "wall" // TODO : ESCAPE use DOOR 
  * if shoot
- * 		<result> [<name>]
+ * 		<cnt> {<name>} <isSamePos> // isSamePos - если убийца тут же подбирает трупы. 
  * if dig
- * 		<result> <cnt> {<items>} // result - может ты откапал ловушку)
- * 
+ * 		<cnt> {<type> <name>}
+ * 		<type> = "trap" | "item" | "ammo" // if type == ammo then name = ammo
  * */
  
- //~ TODO:
- //~  Удаление Ливеров !!!
- //~  Присвоение паторонов при создании игрока!
- //~  Коменты в этом файле
+ //TODO:
+ //		Коменты!!!
+ // 	В начеле хода предупреждение о мягком месте
+ //		Настройки Сервера(almost finished)
  
 #pragma strict
+var repeatNameMessage = "INCORRECT NAME : This name is already in use on the server.";
 
 var playerName : String = "NooB";
+var maxResultSize : int = 400;
 // Типо указатели на обьекты.
 var serverPrefab : GameObject;
 var playerPrefab : GameObject;
+private var serverData : ServerData;
 
 var myLog : GameLog;
 private var W : int;
 private var H : int;
+private var startAmmo : int;
 private var iStart : int;
 private var jStart : int;
+private var startLife : int;
+var isServer : boolean = false;
 
 var map : String;
 var myTurn : boolean;
@@ -38,24 +45,32 @@ private var wait : boolean = false;
 
 function Start () {
 	DontDestroyOnLoad(gameObject);
+	serverData = GameObject.Find("Server Data").GetComponent(ServerData);
 }
 
 function createPlayer(name : String, w : int, h : int, i : int, j : int) {
-	myLog = new GameLog(w, h, true, i, j);
+	Debug.Log("createPlayer : " + name);
+	myLog = new GameLog(w, h, startAmmo, startLife, true, i, j);
 	playerName = name;
-	networkView.RPC("addPlayer", RPCMode.Server, i, j, name);
-	networkView.RPC("addGameLog", RPCMode.All, w, h, name, "All");
+	var player : NetworkPlayer = networkView.owner;
+	if (!isServer)
+		networkView.RPC("addPlayer", RPCMode.Server, player, i, j, name);
+	else
+		addPlayer(player, i, j, name);
+	networkView.RPC("addGameLog", RPCMode.AllBuffered, w, h, startAmmo, startLife, name, "All");
 }
 
-function launchServer(w : int, h : int, map : String, nameP : String, i : int, j : int) {
-	W = w;
-	H = h;
+function launchServer(nameP : String, i : int, j : int) {
+	W = serverData.weight;
+	H = serverData.height;
+	isServer = true;
 	Network.InitializeServer(32, 25000, false);
 	var server : GameObject = Instantiate(serverPrefab);
-	server.GetComponent(Server).initField(w, h);
+	server.GetComponent(Server).initField();
+	startAmmo = serverData.startAmmo;
 	server.name = "Server";
-	Application.LoadLevel(map);
-	createPlayer(nameP, w, h, i, j);
+	Application.LoadLevel(serverData.map);
+	createPlayer(nameP, W, H, i, j);
 }
 
 function connectToServer(ip : String, i : int, j : int, nameP : String) {
@@ -94,15 +109,22 @@ function OnGUI() {
 
 function sendTurn(turn : String) {
 	myTurn = false;
-	networkView.RPC("doTurn", RPCMode.Server, turn, playerName);
+	if (!isServer)
+		networkView.RPC("doTurn", RPCMode.Server, turn, playerName); 
+	else 
+		doTurn(turn, playerName);
 }
 
-function sendResultOfTurn(nameP : String, turn : String, result : String, nameNext : String) {
-	networkView.RPC("visualiseTurn", RPCMode.All, nameP, turn, result);
+function sendWhoNext(nameNext : String) {
 	networkView.RPC("setTurn", RPCMode.All, nameNext);
 }
 
-//****************************** THIS FUNCITONS FOR SERVER:
+function sendResultOfTurn(nameP : String, turn : String, result : String, nameNext : String) {
+	networkView.RPC("doResultOfTurn", RPCMode.All, nameP, turn, result);
+	networkView.RPC("setTurn", RPCMode.All, nameNext);
+}
+
+//****************************** THIS FUNCTIONS FOR SERVER:
 @RPC
 function doTurn(turn : String, nameP : String) {
 	GameObject.Find("Server").GetComponent(Server).doTurn(turn, nameP);
@@ -116,47 +138,128 @@ function getData(nameP : String) {
 	for (var i : int = 0; i < allObj.length; i++) {
 		if (nameP == allObj[i].name) correctName = false;
 	}
-	networkView.RPC("setAll", RPCMode.Others, GameObject.Find("Server").GetComponent(Server).field.w,
-					 GameObject.Find("Server").GetComponent(Server).field.h, "Classic", correctName);
+	networkView.RPC("setAll", 
+		RPCMode.Others, 
+		serverData.weight,
+		serverData.height,
+		serverData.startAmmo,
+		serverData.startLife,
+		"Classic", correctName);
 }
 
 @RPC
-function addPlayer(i : int, j : int, nameP : String) {
-	GameObject.Find("Server").GetComponent(Server).addPlayer(i, j, name);
+function addPlayer(player : NetworkPlayer, i : int, j : int, nameP : String) {
+	Debug.Log("catched query to addPlayer : " + nameP);
+	GameObject.Find("Server").GetComponent(Server).addPlayer(i, j, nameP, player);
 	
-	var otherPlayers : GameObject[] = GameObject.FindGameObjectsWithTag("GameLog");
+	/*var otherPlayers : GameObject[] = GameObject.FindGameObjectsWithTag("GameLog");
 	for (var k : int = 0; k < otherPlayers.length; k++) {
-		networkView.RPC("addGameLog", RPCMode.All, W, H, otherPlayers[k].name, nameP);	
+		networkView.RPC("addGameLog", 
+			RPCMode.All, 
+			W, H, 
+			serverData.startAmmo,
+			serverData.startLife,
+			otherPlayers[k].name, nameP);	
+	}*/
+}
+
+//****************************** THIS FUNCTIONS FOR CLIENTS:
+@RPC
+function doResultOfTurn(nameP : String, turnS : String, resultS : String) {
+	//Debug.Log(nameP + '|' + turnS + '|' + resultS);
+	var turn : String[] = turnS.Split([' '], 3, System.StringSplitOptions.None);
+	var result : String[] = resultS.Split([' '], maxResultSize, System.StringSplitOptions.None);
+	var gameLog : GameLog = GameObject.Find(nameP).GetComponent(PlayerGameLog).data;
+	if (nameP == playerName) gameLog = myLog;
+	if (turn[0] == "move") {
+		if (result[0] == "wall") {
+			gameLog.addWall(turn[1], "wall");
+		} else if (result[0] == "move") {
+			gameLog.addMove(turn[1]);
+			var corpseCount : int = int.Parse(result[1]);
+			for (var it : int = 0; it < corpseCount; it++) {
+				var name : String = result[2 + it];
+				if (name != playerName) gameLog.player.take(GameObject.Find(name).GetComponent(PlayerGameLog).data.player);
+				else gameLog.player.take(myLog.player);
+			}
+			var trapCount : int = int.Parse(result[2 + corpseCount]);
+			for (it = 0; it < trapCount; it++) {
+				name = result[3 + corpseCount + it];
+				gameLog.use(new Trap(name));
+			}
+			if (result[3 + corpseCount + trapCount] == "1") {
+				gameLog.addObject(new Treasure("unknown"));
+			}
+		}
+	} else if (turn[0] == "shoot") {
+		var tmpPlayer : Player = gameLog.player;
+		if (turn[2] == "bullet") 
+			tmpPlayer.ammo--;
+		else {
+			for (it = 0; it < tmpPlayer.items.Count; it++) {
+				if (tmpPlayer.items[it] == turn[2]) {
+					tmpPlayer.items.RemoveAt(it);
+					break;
+				}
+			}
+		}
+		var victimCount : int = int.Parse(result[0]);
+		var isSamePos : boolean = result[victimCount + 1] == "1";
+		for (it = 0; it < victimCount; it++) {
+			name = result[1 + it];
+			if (name != playerName) {
+				tmpPlayer = GameObject.Find(name).GetComponent(PlayerGameLog).data.player;
+			} else {
+				tmpPlayer = myLog.player;
+			}
+			tmpPlayer.hit(turn[2]);
+			if (isSamePos)
+				gameLog.player.take(tmpPlayer);
+		}
+	} else if (turn[0] == "dig") {
+		var count = int.Parse(result[0]);
+		for (it = 0; it < count; it++) {
+			var type : String = result[it * 2 + 1];
+			name = result[it * 2 + 2];
+			if (type == "item") {
+				gameLog.player.items.Add(name);
+			} else if (type == "trap") {
+				gameLog.use(new Trap(name));
+			} else if (type == "ammo") {
+				gameLog.player.ammo += int.Parse(name);
+			} else if (type == "empty") {
+				
+			}
+		}
 	}
-}
-
-//****************************** THIS FUNCITONS FOR CLIENTS:
-@RPC
-function visualiseTurn(nameP : String, turn : String, result : String) {
-	//TODO: + Print messages
+	//TODO: VISUALISE + Print messages
 }
 
 @RPC
-function setAll(w : int, h : int, MAP : String, correctName : boolean) {
+function setAll(w : int, h : int, startammo : int, startlife : int, MAP : String, correctName : boolean) {
 	if (!correctName) {
 		Network.Disconnect();
-		//TODO : Message;
+		//TODO:
+			Debug.Log(repeatNameMessage);
 		return;
 	}
+	startLife = startlife;
 	W = w;
 	H = h;
 	map = MAP;
+	startAmmo = startammo;
 	createPlayer(playerName, w, h, iStart, jStart);
 	Application.LoadLevel(map);
 }
 
 @RPC
-function addGameLog(w : int, h : int, name : String, toName : String) {
+function addGameLog(w : int, h : int, ammo : int, life : int, name : String, toName : String) {
+	Debug.Log(toName + " == " + playerName + " ---> " + name);
 	if (toName != "All" && toName != playerName) {
 		return;
 	}
 	var player : GameObject = Instantiate(playerPrefab, Vector3.zero, Quaternion(0, 0, 0, 0));
-	player.GetComponent(PlayerGameLog).init(name, w * 2, h * 2, false, w, h);
+	player.GetComponent(PlayerGameLog).init(name, w * 2 - 1, h * 2 - 1, ammo, life, false, w - 1, h - 1);
 	player.name = new String.Copy(name);	
 }
 

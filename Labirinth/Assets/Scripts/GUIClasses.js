@@ -25,19 +25,26 @@ class GUIScale {
 		XScale = x;
 		Yscale = y;
 	}
+	
+	
 }
 
 //класс для хранения параметров GUI обьекта (почему локация известно только Богу)
 class GUIObject{
-	static var normalSize : float = 30; // нормальна высота обьекта (Использюется только для вычесления размера шрифта) 
+	static var normalSize : float = 30; // нормальна высота/ширина обьекта (Использюется только для вычесления размера шрифта) 
 	var scale : GUIScale;
 	var position : Rect;
-	var style : GUIStyle;
-	var normalFontSize : float; // размер шрифта при нормальной высоте.
 	var content : GUIContent;
+	var fontSize : float;
+	var normalFontSize : float; // размер шрифта при нормальной высоте
+	var normalFontSizeW : float; // размер шрифта при нормальной высоте
+	
 	// Изменяет размер шрифта под текущий размер обьекта.
 	function normalizeFont() {
-		style.fontSize = normalFontSize / normalSize * Screen.height * scale.heigthScale; 
+		//fontSize = Mathf.Min(normalFontSize / normalSize * Screen.height * scale.heigthScale, (normalFontSizeW / normalSize * Screen.width * scale.widthScale)); 
+		var a1 : float = normalFontSize / normalSize * Screen.height * scale.heigthScale;
+		var a2 : float = normalFontSizeW / normalSize * Screen.width * scale.widthScale;
+		fontSize = Mathf.Min(a1, a2); 
 	}
 }
 
