@@ -1,5 +1,7 @@
 ﻿/* Рисует поле + Анимация(coming soon)
  */
+ 
+//TODO : Снизу характеристики игрока.
 #pragma strict
 
 var wall : GameObject;
@@ -50,7 +52,6 @@ function init(gameLog : GameLog) {
 	}
 	for (i = 0; i < gameLog.h + 1; i++) {
 		for (j = 0; j < gameLog.w; j++) {
-//			Debug.Log(i.ToString() + ' ' + j.ToString());
 			if (gameLog.horizontWalls[i, j] != "empty") addWall(i, j, "horizont", 0);
 		}
 	}
@@ -62,13 +63,21 @@ function init(gameLog : GameLog) {
 	//TODO : -->
 	var scale : double = gameLog.h;
 	scale /= 10;
-	GameObject.Find("Main Camera").transform.position = Vector3(gameLog.w * zSize / 2, 40 * scale, 9 * scale);
+	GameObject.Find("Main Camera").transform.position = Vector3(gameLog.w * zSize * 0.78, 52 * scale, 15 * scale);
 	//END:
-	addObject(gameLog.iCur, gameLog.jCur, "hero", 1);
+	addObject(gameLog.iCur, gameLog.jCur, "hero", 228);
 }
 
 function Start() {
 	xSize = wall.transform.localScale.x;
 	ySize = wall.transform.localScale.y;
 	zSize = wall.transform.localScale.z;
+}
+
+function addWallAnimation(i : int, j :int, type : String, num : int) {
+	//TODO:
+}
+
+function moveHeroAnimation(direction : String) {
+	//TODO:
 }

@@ -48,12 +48,17 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Containers.js" />
      <Compile Include="Assets\Scripts\GUIClasses.js" />
+     <Compile Include="Assets\Scripts\Items.js" />
      <Compile Include="Assets\Scripts\Labyrinth.js" />
+     <Compile Include="Assets\Scripts\LabyrinthObjectFactory.js" />
      <Compile Include="Assets\Scripts\MainMenu.js" />
      <Compile Include="Assets\Scripts\NetworkAdmin.js" />
      <Compile Include="Assets\Scripts\PlayerGUI.js" />
      <Compile Include="Assets\Scripts\PlayerGameLog.js" />
      <Compile Include="Assets\Scripts\Server.js" />
+     <Compile Include="Assets\Scripts\ServerData.js" />
+     <Compile Include="Assets\Scripts\Traps.js" />
+     <Compile Include="Assets\Scripts\Treasures.js" />
      <Compile Include="Assets\Scripts\Visualisator.js" />
  <Reference Include="Assembly-UnityScript-firstpass">
  <HintPath>Library\ScriptAssemblies\Assembly-UnityScript-firstpass.dll</HintPath>
