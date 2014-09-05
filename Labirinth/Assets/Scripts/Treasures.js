@@ -14,8 +14,4 @@ class Treasure extends LabyrinthObject {
 			return res;
 		};
 	}
-	
-	function remove(field : Labyrinth) {
-		type = TYPE_EMPTY;
-	}
 };

@@ -49,7 +49,6 @@ class Bullet extends Item {
 		hitPlayer = function(player : Player, field : Labyrinth) {
 			player.life--;
 			player.alive = player.life > 0;
-			type = TYPE_EMPTY;
 		};
 	}
 }

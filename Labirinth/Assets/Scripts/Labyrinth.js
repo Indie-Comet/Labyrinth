@@ -21,7 +21,7 @@
 
 
 // TODO: Return info from item;
-// Delete players
+// AddObject - Optimize
 
 class LabyrinthObject extends Object {
 	static public var TYPE_EMPTY = 0;
@@ -43,6 +43,10 @@ class LabyrinthObject extends Object {
 		toString = function() : String {
 			return type.ToString();
 		};
+	}
+	
+	function remove() {
+		type = TYPE_EMPTY;
 	}
 };
 

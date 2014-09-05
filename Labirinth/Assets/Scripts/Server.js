@@ -229,7 +229,7 @@ function dig(nameP : String) {
 			player.items.Add(item);
 			result += ' ' + item.itemType;
 		}
-		treasure.remove(field);
+		treasure.remove();
 	}
 	
 	nameNext = turnQueue.pop() || nameP;

@@ -29,7 +29,7 @@ class Landmine extends Trap {
 		cought = function(player : Player, field : Labyrinth) {
 			player.life--;
 			player.alive = (player.life > 0);
-			type = TYPE_EMPTY;
+			remove();
 		};
 	}
 };
